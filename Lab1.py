@@ -9,7 +9,7 @@ class Perceptron():
     def __init__(inDim, outDim):
         self.inDim = inDim
         self.outDim = outDim
-        self.W = 
+        self.W = np.random.multivariate_normal(np.zeros(outDim), 0.1 * np.identity(outDim), size = inDim)
 
     def deltaRule():
 
