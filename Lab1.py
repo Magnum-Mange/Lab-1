@@ -2,8 +2,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-##class ANN():
-
 class singleLayerPerceptron():
 
     def __init__(self, inDim, outDim):
@@ -14,21 +12,50 @@ class singleLayerPerceptron():
 ##        print(self.W)
         self.eta = 0.001
 
-    def deltaRule(self, X, T, epochs, isSeq):
+    def deltaRule(self, X, T, epochs, isSeq, testX, testPatterns, testSize):
+        accuracies = []
         for epoch in range(epochs):
             oldW = np.copy(self.W)
             if isSeq:
-                for patternNo in range(len(X)):
-                    self.W += -self.eta * np.dot(np.dot(self.W, X[patternNo]) - T[patternNo], X[patternNo].T)
+                for patternNo in range(len(X[0])):
+##                    print(self.W)
+                    self.W += -self.eta * np.dot(np.asscalar(np.dot(self.W, X[:, patternNo]) - T[patternNo]), X[:, patternNo].T)
             else:
                 self.W += -self.eta * np.dot((np.dot(self.W, X) - T), X.T)
 
-            print(np.linalg.norm(self.W - oldW))
+            correct = 0
+            for dataPointNo in range(testSize):
+                if np.sign(testPatterns[dataPointNo]) == np.sign(self.predict(testX[:, dataPointNo], False)):
+                    correct += 1
+
+            accuracies.append(correct / testSize)
+
+##            print(np.linalg.norm(self.W - oldW))
+
+        return accuracies
         
 
-    def perceptronLearning(self, inData, isSeq):
-        #todo
-        return 0
+    def perceptronLearning(self, X, T, epochs, isSeq, testX, testPatterns, testSize):
+        accuracies = []
+        for epoch in range(epochs):
+            oldW = np.copy(self.W)
+            if isSeq:
+                for patternNo in range(len(X[0])):
+##                    print(self.W)
+                    self.W += -self.eta * np.dot(np.asscalar(np.sign(np.dot(self.W, X[:, patternNo])) - T[patternNo]), X[:, patternNo].T)
+            else:
+                self.W += -self.eta * np.dot((np.sign(np.dot(self.W, X)) - T), X.T)
+
+            correct = 0
+            for dataPointNo in range(testSize):
+                if np.sign(testPatterns[dataPointNo]) == np.sign(self.predict(testX[:, dataPointNo], False)):
+                    correct += 1
+
+            accuracies.append(correct / testSize)
+
+##            print(np.linalg.norm(self.W - oldW))
+
+        return accuracies
 
     def predict(self, X, isSeq):
         if isSeq:
@@ -57,9 +84,9 @@ class multiLayerPerceptron():
 
 def _31():
     # Generating linearly separable data
-    ##mean1 = np.array([1, 1])
-    ##mean2 = np.array([1, -1])
-    ##cov = np.array([[0.1, 0], [0, 0.1]])
+##    mean1 = np.array([1, 1])
+##    mean2 = np.array([1, -1])
+##    cov = np.array([[0.1, 0], [0, 0.1]])
 
     # Generating non-linearly separable data
 
@@ -94,16 +121,30 @@ def _31():
     plt.scatter(testData[:, 0], testData[:, 1])
     plt.show()
 
-    perceptron = singleLayerPerceptron(3, 1)
-    perceptron.deltaRule(X, patterns, 20, False)
-    correct = 0
-    for dataPointNo in range(testSize):
+##    print(patterns)
+##    print(X[:, 0])
+
+    epochs = 50
+    trials = 100
+    accuracies = np.zeros(epochs)
+    for trial in range(trials):
+        perceptron = singleLayerPerceptron(3, 1)
+        accuracies += perceptron.perceptronLearning(X, patterns, epochs, True, testX, testPatterns, testSize)
+        print(accuracies)
+
+    plt.plot(np.linspace(1, epochs, epochs), accuracies / trials)
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.title("Perceptron learning rule with sequential learning, non-linearly separable data")
+    plt.show()
+##    correct = 0
+##    for dataPointNo in range(testSize):
     ##    print(testPatterns[dataPointNo])
     ##    print(perceptron.predict(testX[:, dataPointNo], False))
-        if np.sign(testPatterns[dataPointNo]) == np.sign(perceptron.predict(testX[:, dataPointNo], False)):
-            correct += 1
+##        if np.sign(testPatterns[dataPointNo]) == np.sign(perceptron.predict(testX[:, dataPointNo], False)):
+##            correct += 1
 
-    print(correct / testSize)
+##    print(correct / testSize)
 
 def _32():
     return 0
